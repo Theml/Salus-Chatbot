@@ -2,7 +2,7 @@ import random
 import nltk
 from nltk.chat.util import Chat, reflections
 
-<!-- Antes de tentar executar rodar os comandos `python -m venv venv`,`.\venv\Scripts\Activate.ps1`, `pip install nltk`, `python -m downloader all` --!>
+<!-- Antes de tentar executar rodar os comandos `python -m venv venv`,`.\venv\Scripts\Activate.ps1`, `pip install nltk`, `python -m nltk.downloader all` --!>
 pares = [
     [
         r"Oi|Olá|E ai",
