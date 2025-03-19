@@ -35,11 +35,10 @@ reflections = {
 
 chatbot = Chat(pares, reflections)
 
-def iniciar_chat():
-    while True:
-        entrada = input("Você: ")
-        if entrada.lower() == "sair":
-            print("Chatbot: Adeus!")
-            break
-        response = chatbot.respond(entrada)
-        print("Chatbot:", response)
+while True:
+    entrada = input("Você: ")
+    if entrada.lower() == "sair":
+        print("Chatbot: Adeus!")
+        break
+    response = chatbot.respond(entrada)
+    print("Chatbot:", response)
