@@ -9,8 +9,16 @@ pares = [
         ["Olá", "Como posso ajudar você?", "Oi como está?"],
     ],
     [
-        r"Qual o seu nome?",
-        ["Meu nome é Chatbot", "Você pode me chamar de Chatbot", "Sou o Chatbot"],
+        r"Qual o seu nome\?",
+        ["Meu nome é Chatbot", "Você pode me chamar de Chatbot", "Sou o Chatbot IX"],
+    ],
+    [
+        r"Olá meu nome é (.*)",
+        ["Olá %1, prazer em te conhcer!"],
+    ],
+    [
+        r"adeus|tchau",
+        ["Adeus foi um prazer conversar com você!"],
     ],
     [
         r"(.*)\?",
@@ -25,6 +33,13 @@ pares.extend([
 reflections = {
     "eu" : "você",
     "meu" : "seu",
+    "meus" : "seus",
+    "minha" : "sua",
+    "minhas" : "suas",
+    "sou" : "é",
+    "estou" : "está",
+    "fui" : "foi",
+    "era" : "é",
     "você" : "eu",
     "seu" : "meu",
     "eu sou": "você é",
@@ -35,10 +50,14 @@ reflections = {
 
 chatbot = Chat(pares, reflections)
 
-while True:
-    entrada = input("Você: ")
-    if entrada.lower() == "sair":
-        print("Chatbot: Adeus!")
-        break
-    response = chatbot.respond(entrada)
-    print("Chatbot:", response)
+def iniciar_chat():
+    print("Bem vindo ao chatbot nltk! Digite 'sair' para encerrar.")
+    while True:
+        entrada = input("Você: ")
+        if entrada.lower() == "sair":
+            print("Chatbot: Adeus!")
+            break
+        response = chatbot.respond(entrada)
+        print("Chatbot:", response)
+
+iniciar_chat()
