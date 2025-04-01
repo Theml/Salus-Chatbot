@@ -1,8 +1,9 @@
 import random
 import nltk
 from nltk.chat.util import Chat, reflections
+from flask import Flask, render_template, request, jsonify
 
-# Antes de tentar executar rodar os comandos `python -m venv venv`,`.\venv\Scripts\Activate`, `pip install nltk`, `python -m nltk.downloader all` 
+# Antes de tentar executar rodar os comandos `python -m venv venv`,`.\venv\Scripts\Activate`, `pip install nltk`, pip install flask, `python -m nltk.downloader all` 
 pares = [
     [
         r"Oi|Olá|E ai",
@@ -11,6 +12,18 @@ pares = [
     [
         r"Qual o seu nome\?",
         ["Meu nome é Chatbot", "Você pode me chamar de Chatbot", "Sou o Chatbot IX"],
+    ],
+    [
+        r"Qual é a sua idade\?",
+        ["Eu sou um programa de computador, não tenho idade.", "Idade é apenas um número, certo?"],
+    ],
+    [
+        r"Qual é o seu propósito\?",
+        ["Meu propósito é ajudar você com suas perguntas e dúvidas.", "Estou aqui para ajudar!"],
+    ],
+    [
+        r"Como você está\?",
+        ["Estou ótimo","Estou apenas um programa, mas obrigado por perguntar!", "Estou aqui para ajudar!"],
     ],
     [
         r"Olá meu nome é (.*)",
@@ -50,14 +63,20 @@ reflections = {
 
 chatbot = Chat(pares, reflections)
 
-def iniciar_chat():
-    print("Bem vindo ao chatbot nltk! Digite 'sair' para encerrar.")
-    while True:
-        entrada = input("Você: ")
-        if entrada.lower() == "sair":
-            print("Chatbot: Adeus!")
-            break
-        response = chatbot.respond(entrada)
-        print("Chatbot:", response)
+app = Flask(__name__)
 
-iniciar_chat()
+@app.route("/")
+def index():
+    return render_template("chat.html")
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.json
+    print(f"Dados recebidos: {data}")
+    user_input = data.get("message")
+    response = chatbot.respond(user_input)
+    print(f"Resposta do chatbot: {response}")
+    return jsonify({"response": response})
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)
