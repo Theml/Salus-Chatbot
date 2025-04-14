@@ -3,85 +3,375 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-        }
-        .chat-container {
-            width: 400px;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .messages {
-            height: 300px;
-            overflow-y: auto;
-            border-bottom: 1px solid #ccc;
-            margin-bottom: 10px;
-        }
-        .input-container {
-            display: flex;
-        }
-        input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            padding: 10px;
-            border: none;
-            background: blue;
-            color: white;
-            cursor: pointer;
-            border-radius: 5px;
-            margin-left: 5px;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/chat.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Salus - Seu Assistente de Saúde</title>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="messages" id="messages"></div>
-        <div class="input-container">
-            <input type="text" id="user-input" placeholder="Digite sua mensagem..." onkeypress="handleKeyPress(event)">
-            <button onclick="sendMessage()">Enviar</button>
+    <div class="app-container" id="app-container">
+        <!-- Sidebar para conversas -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <button class="new-chat-btn" id="new-chat-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Nova Conversa
+                </button>
+            </div>
+            <div class="conversation-list" id="conversation-list">
+                <!-- As conversas serão adicionadas dinamicamente aqui -->
+            </div>
+            <div class="sidebar-footer">
+                <div class="user-info">Salus Health Assistant v1.0</div>
+            </div>
+        </div>
+        
+        <button class="toggle-sidebar-btn" id="toggle-sidebar-btn" title="Toggle Sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+
+        
+        <div class="main-content" id="main-content">
+            <div class="chat-container" id="active-chat" style="display: none;">
+                <div class="chat-header">
+                    <h1>Salus - Seu Assistente de Saúde</h1>
+                </div>
+                
+                <div class="chat-box" id="chat-box">
+                    <!-- Mensagens serão adicionadas aqui dinamicamente -->
+                </div>
+                
+                <div class="input-area">
+                    <input type="text" id="user-input" placeholder="Digite sua pergunta sobre saúde...">
+                    <button id="send-btn">Enviar</button>
+                </div>
+                
+                <div class="health-tips">
+                    <h3>Dica de saúde do dia:</h3>
+                    <p id="daily-tip">Beber água regularmente ajuda na digestão, absorção de nutrientes e eliminação de toxinas do corpo.</p>
+                </div>
+            </div>
+            
+            <div class="no-conversation" id="no-conversation">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#10a37f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <h2>Bem-vindo ao Salus</h2>
+                <p>Seu assistente de saúde pessoal. Comece uma nova conversa para tirar dúvidas sobre saúde, bem-estar, nutrição e mais.</p>
+                <button class="new-chat-btn" id="start-new-chat-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Iniciar Nova Conversa
+                </button>
+            </div>
         </div>
     </div>
+
     <script>
-        function sendMessage() {
-            let input = document.getElementById("user-input");
-            let message = input.value;
-            if (!message) return;
-
-            let messagesDiv = document.getElementById("messages");
-            messagesDiv.innerHTML += `<div><strong>Você:</strong> ${message}</div>`;
-            input.value = "";
-
-            fetch("/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message })
-            })
-            .then(response => response.json())
-            .then(data => {
-                messagesDiv.innerHTML += `<div><strong>Bot:</strong> ${data.response}</div>`;
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatBox = document.getElementById('chat-box');
+            const userInput = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
+            const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
+            const appContainer = document.getElementById('app-container');
+            const sidebar = document.getElementById('sidebar');
+            const newChatBtn = document.getElementById('new-chat-btn');
+            const startNewChatBtn = document.getElementById('start-new-chat-btn');
+            const conversationList = document.getElementById('conversation-list');
+            const activeChat = document.getElementById('active-chat');
+            const noConversation = document.getElementById('no-conversation');
+            
+            const dailyTips = [
+                "Beber água regularmente ajuda na digestão, absorção de nutrientes e eliminação de toxinas do corpo.",
+                "Uma boa postura durante o trabalho pode prevenir dores nas costas e pescoço.",
+                "Dormir de 7 a 9 horas por noite fortalece o sistema imunológico e melhora a concentração.",
+                "Reservar pelo menos 30 minutos diários para atividade física traz benefícios à saúde física e mental.",
+                "Incluir alimentos coloridos no prato garante maior variedade de vitaminas e minerais."
+            ];
+            
+            let conversations = [];
+            let activeConversationId = null;
+            
+            loadConversations();
+            
+            document.getElementById('daily-tip').textContent = dailyTips[Math.floor(Math.random() * dailyTips.length)];
+            
+            toggleSidebarBtn.addEventListener('click', toggleSidebar);
+            newChatBtn.addEventListener('click', createNewConversation);
+            startNewChatBtn.addEventListener('click', createNewConversation);
+            sendBtn.addEventListener('click', sendMessage);
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
             });
-        }
-
-        function handleKeyPress(event) {
-            if (event.key === "Enter") {
-                sendMessage();
-                event.preventDefault();
+            
+            // Funções
+            function toggleSidebar() {
+                appContainer.classList.toggle('sidebar-collapsed');
             }
-        }
+            
+            function loadConversations() {
+                try {
+                    const savedConversations = localStorage.getItem('salus_conversations');
+                    if (savedConversations) {
+                        conversations = JSON.parse(savedConversations);
+                        renderConversationList();
+                        
+                        if (conversations.length > 0) {
+                            let lastActive = conversations.find(c => c.isActive) || conversations[0];
+                            loadConversation(lastActive.id);
+                        } else {
+                            showNoConversationScreen();
+                        }
+                    } else {
+                        showNoConversationScreen();
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar conversas:', error);
+                    showNoConversationScreen();
+                }
+            }
+            
+            function saveConversations() {
+                localStorage.setItem('salus_conversations', JSON.stringify(conversations));
+            }
+            
+            function createNewConversation() {
+                const now = new Date();
+                const newId = 'conv_' + Date.now();
+                const newConversation = {
+                    id: newId,
+                    title: 'Nova Conversa',
+                    date: now.toISOString(),
+                    messages: [],
+                    isActive: true
+                };
+                
+                conversations.forEach(c => c.isActive = false);
+                
+                conversations.unshift(newConversation);
+                activeConversationId = newId;
+                
+                saveConversations();
+                renderConversationList();
+                
+                showActiveChat();
+                chatBox.innerHTML = '';
+                showBotMessage("Olá! Eu sou Salus, seu assistente virtual de saúde. Como posso ajudar você hoje?");
+                
+                userInput.focus();
+            }
+            
+            function loadConversation(id) {
+
+                conversations.forEach(c => {
+                    c.isActive = (c.id === id);
+                });
+                activeConversationId = id;
+                
+                const activeConv = conversations.find(c => c.id === id);
+                if (!activeConv) return;
+                
+                chatBox.innerHTML = '';
+                if (activeConv.messages.length === 0) {
+                    showBotMessage("Olá! Eu sou Salus, seu assistente virtual de saúde. Como posso ajudar você hoje?");
+                } else {
+                    activeConv.messages.forEach(msg => {
+                        if (msg.sender === 'user') {
+                            appendUserMessage(msg.text);
+                        } else {
+                            showBotMessage(msg.text);
+                        }
+                    });
+                }
+                
+                renderConversationList();
+                showActiveChat();
+                saveConversations();
+            }
+            
+            function renderConversationList() {
+                conversationList.innerHTML = '';
+                
+                conversations.forEach(conv => {
+                    const item = document.createElement('div');
+                    item.classList.add('conversation-item');
+                    if (conv.isActive) item.classList.add('active');
+                    
+                    item.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span>${conv.title}</span>
+                    `;
+                    
+                    item.addEventListener('click', () => loadConversation(conv.id));
+                    conversationList.appendChild(item);
+                });
+            }
+            
+            function updateConversationTitle(text) {
+                if (!activeConversationId) return;
+                
+                const activeConv = conversations.find(c => c.id === activeConversationId);
+                if (!activeConv) return;
+                
+                const words = text.split(' ');
+                activeConv.title = words.slice(0, 3).join(' ') + (words.length > 3 ? '...' : '');
+                
+                saveConversations();
+                renderConversationList();
+            }
+            
+            function showActiveChat() {
+                activeChat.style.display = 'flex';
+                noConversation.style.display = 'none';
+            }
+            
+            function showNoConversationScreen() {
+                activeChat.style.display = 'none';
+                noConversation.style.display = 'flex';
+            }
+            
+            function sendMessage() {
+                const message = userInput.value.trim();
+
+                if(message.length === 0) {
+                    showBotMessage("Por favor, digite uma mensagem.");
+                    return;
+                }
+
+                if(message.length > 500) {
+                    showBotMessage("A mensagem é muito longa. Tente resumir.");
+                    return;
+                }
+
+                if (message) {
+                    if (!activeConversationId) {
+                        createNewConversation();
+                    }
+                    
+                    appendUserMessage(message);
+                    saveMessageToConversation('user', message);
+                    
+                    const activeConv = conversations.find(c => c.id === activeConversationId);
+                    if (activeConv && activeConv.messages.length <= 1) {
+                        updateConversationTitle(message);
+                    }
+                    
+                    userInput.value = '';
+                    sendBtn.disabled = true;
+                    
+                    const typingIndicator = document.createElement('div');
+                    typingIndicator.classList.add('message-container');
+                    typingIndicator.id = 'typing-indicator';
+                    typingIndicator.innerHTML = `
+                        <div class="avatar bot-avatar">S</div>
+                        <div class="typing-indicator">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    `;
+                    chatBox.appendChild(typingIndicator);
+                    scrollToBottom();
+                    
+                    setTimeout(function() {
+                        fetch('/chat', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ 
+                                message: message,
+                                conversation_id: activeConversationId
+                            }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            document.getElementById('typing-indicator').remove();
+                            showBotMessage(data.response);
+                            saveMessageToConversation('bot', data.response);
+                            sendBtn.disabled = false;
+                        })
+                        .catch(error => {
+                            document.getElementById('typing-indicator').remove();
+                            showBotMessage("Desculpe, houve um problema ao processar sua pergunta.");
+                            saveMessageToConversation('bot', "Desculpe, houve um problema ao processar sua pergunta.");
+                            sendBtn.disabled = false;
+                            console.error('Error:', error);
+                        });
+                    }, 1000);
+                }
+            }
+            
+            function saveMessageToConversation(sender, text) {
+                const activeConv = conversations.find(c => c.id === activeConversationId);
+                if (activeConv) {
+                    activeConv.messages.push({
+                        sender: sender,
+                        text: text,
+                        timestamp: new Date().toISOString()
+                    });
+                    saveConversations();
+                }
+            }
+            
+            function appendUserMessage(text) {
+                const messageContainer = document.createElement('div');
+                messageContainer.classList.add('message-container');
+                messageContainer.style.justifyContent = 'flex-end';
+                
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', 'user-message');
+                messageDiv.textContent = text;
+                
+                const avatarDiv = document.createElement('div');
+                avatarDiv.classList.add('avatar', 'user-avatar');
+                avatarDiv.textContent = 'U';
+                
+                messageContainer.appendChild(messageDiv);
+                messageContainer.appendChild(avatarDiv);
+                
+                chatBox.appendChild(messageContainer);
+                scrollToBottom();
+            }
+            
+            function showBotMessage(text) {
+                const messageContainer = document.createElement('div');
+                messageContainer.classList.add('message-container');
+                
+                const avatarDiv = document.createElement('div');
+                avatarDiv.classList.add('avatar', 'bot-avatar');
+                avatarDiv.textContent = 'S';
+                
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', 'bot-message');
+                messageDiv.textContent = text;
+                
+                messageContainer.appendChild(avatarDiv);
+                messageContainer.appendChild(messageDiv);
+                
+                chatBox.appendChild(messageContainer);
+                scrollToBottom();
+            }
+            
+            function scrollToBottom() {
+                chatBox.scrollTo({
+                    top: chatBox.scrollHeight, 
+                    behavior: 'smooth'
+                });
+            }
+        });
     </script>
 </body>
 </html>
