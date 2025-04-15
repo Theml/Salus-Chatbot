@@ -15,6 +15,7 @@ body {
 }
 
 .sidebar {
+  position: relative;
   width: 260px;
   background-color: #202123;
   color: #ffffff;
@@ -40,7 +41,7 @@ body {
   border: none;
   border-radius: 6px;
   padding: 12px;
-  width: 100%;
+  width: 90%;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -95,31 +96,56 @@ body {
   border-top: 1px solid #424242;
 }
 
-.toggle-sidebar-btn {
-  position: fixed;
-  left: 260px;
-  top: 10px;
-  background-color: #343541;
-  color: white;
+.app-container.sidebar-collapsed .sidebar {
+  width: 56px;
+  min-width: 56px;
+  overflow-x: hidden;
+}
+
+.app-container.sidebar-collapsed .sidebar-header,
+.app-container.sidebar-collapsed .sidebar-footer,
+.app-container.sidebar-collapsed .conversation-item span,
+.app-container.sidebar-collapsed .user-info {
+  display: none !important;
+}
+
+.app-container.sidebar-collapsed .conversation-item {
+  justify-content: center;
+}
+
+.app-container.sidebar-collapsed .conversation-item svg {
+  margin-right: 0;
+}
+
+.expand-sidebar-btn {
+  position: absolute;
+  top: 50%;
+  right: -18px;
+  width: 36px;
+  height: 36px;
+  background: #10a37f;
   border: none;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  box-shadow: 0 2px 8px rgba(16,163,127,0.08);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 10;
-  transition: left 0.3s ease;
+  transition: background 0.2s, right 0.3s;
+  z-index: 1000;
+  padding: 0;
 }
 
-.sidebar-collapsed .toggle-sidebar-btn {
-  left: 10px;
+.expand-sidebar-btn svg {
+  width: 22px;
+  height: 22px;
+  stroke: #10a37f;
+  background: transparent;
+  transition: transform 0.3s;
 }
 
-.sidebar-collapsed .sidebar {
-  width: 60px;
-  transform: translateX(-260px);
+.expand-sidebar-btn:hover {
+  background: #10a37f;
 }
 
 .main-content {
@@ -347,11 +373,10 @@ body {
     max-width: 260px;
   }
   
-  .toggle-sidebar-btn {
-    left: 10px;
+  .expand-sidebar-btn {
     top: 10px;
+    right: -18px;
   }
-  
   .message {
     max-width: 95%;
   }

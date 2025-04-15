@@ -26,15 +26,13 @@
             <div class="sidebar-footer">
                 <div class="user-info">Salus Health Assistant v1.0</div>
             </div>
+
+            <button class="expand-sidebar-btn" id="expand-sidebar-btn" title="Expand Sidebar">
+                <svg id="sidebar-arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
         </div>
-        
-        <button class="toggle-sidebar-btn" id="toggle-sidebar-btn" title="Toggle Sidebar">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-        </button>
 
         
         <div class="main-content" id="main-content">
@@ -80,7 +78,8 @@
             const chatBox = document.getElementById('chat-box');
             const userInput = document.getElementById('user-input');
             const sendBtn = document.getElementById('send-btn');
-            const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
+            const expandSidebarBtn = document.getElementById('expand-sidebar-btn');
+            const sidebarArrow = document.getElementById('sidebar-arrow');
             const appContainer = document.getElementById('app-container');
             const sidebar = document.getElementById('sidebar');
             const newChatBtn = document.getElementById('new-chat-btn');
@@ -104,7 +103,7 @@
             
             document.getElementById('daily-tip').textContent = dailyTips[Math.floor(Math.random() * dailyTips.length)];
             
-            toggleSidebarBtn.addEventListener('click', toggleSidebar);
+            expandSidebarBtn.addEventListener('click', expandSidebar);
             newChatBtn.addEventListener('click', createNewConversation);
             startNewChatBtn.addEventListener('click', createNewConversation);
             sendBtn.addEventListener('click', sendMessage);
@@ -115,8 +114,14 @@
             });
             
             // Funções
-            function toggleSidebar() {
+            function expandSidebar() {
                 appContainer.classList.toggle('sidebar-collapsed');
+
+                if (appContainer.classList.contains('sidebar-collapsed')) {
+                sidebarArrow.innerHTML = '<polyline points="15 18 9 12 15 6"></polyline>';
+            } else {
+                sidebarArrow.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
+            }
             }
             
             function loadConversations() {
