@@ -431,7 +431,7 @@ app.secret_key = 'salus_health_assistant'
 
 @app.route("/")
 def index():
-    return render_template("chat.html")
+    return render_template("salus.html")
 
 @app.route("/chat", methods=["POST"])
 def chat():
